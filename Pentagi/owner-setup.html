@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Your Server - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-page" style="padding-top: 80px;">
+        <div class="auth-card" style="max-width: 600px;">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Add Your Server</h2>
+            <p class="auth-subtitle">Fill in the details to list your Minecraft server (Max 3 servers)</p>
+            
+            <form class="auth-form" onsubmit="submitServer(event)">
+                
+                <div class="input-group">
+                    <label>Server Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-server"></i>
+                        <input type="text" id="serverName" placeholder="My Awesome Server" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server IP</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-globe"></i>
+                        <input type="text" id="serverIP" placeholder="play.myserver.com" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Category</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-tag"></i>
+                        <select id="serverCategory" required></select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Short Description</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-align-left"></i>
+                        <textarea id="serverDescription" placeholder="Tell players what makes your server special..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Tags / Keywords</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-tags"></i>
+                        <input type="text" id="serverTags" placeholder="anti-grief, economy, PvE, keep-inventory, jobs" required>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block;">Separate tags with commas.</span>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Logo</label>
+                    <div class="upload-area" id="logoUploadArea" onclick="document.getElementById('logoUpload').click()">
+                        <div id="logoPlaceholder">
+                            <i class="fas fa-image" style="font-size: 28px; color: var(--text-muted);"></i>
+                            <p style="color: var(--text-muted); margin-top: 6px; font-size: 13px;">Click to upload logo</p>
+                        </div>
+                        <img id="logoPreview" style="display:none; max-width: 100%; max-height: 120px; border-radius: var(--radius-md);">
+                        <input type="file" id="logoUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event, 'logo')">
+                    </div>
+                    <button type="button" class="btn-secondary btn-sm" style="margin-top: 6px; display:none;" id="removeLogo" onclick="removeImage('logo')">
+                        <i class="fas fa-trash"></i> Remove Logo
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Banner</label>
+                    <div class="upload-area" id="bannerUploadArea" onclick="document.getElementById('bannerUpload').click()">
+                        <div id="bannerPlaceholder">
+                            <i class="fas fa-panorama" style="font-size: 28px; color: var(--text-muted);"></i>
+                            <p style="color: var(--text-muted); margin-top: 6px; font-size: 13px;">Click to upload banner</p>
+                        </div>
+                        <img id="bannerPreview" style="display:none; max-width: 100%; max-height: 120px; border-radius: var(--radius-md);">
+                        <input type="file" id="bannerUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event, 'banner')">
+                    </div>
+                    <button type="button" class="btn-secondary btn-sm" style="margin-top: 6px; display:none;" id="removeBanner" onclick="removeImage('banner')">
+                        <i class="fas fa-trash"></i> Remove Banner
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label>Max Players</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-users"></i>
+                        <input type="number" id="serverMaxPlayers" placeholder="50" value="50" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Your Discord Username (required)</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="ownerDiscord" placeholder="yourname" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Discord Invite (optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="serverDiscord" placeholder="https://discord.gg/yourserver">
+                    </div>
+                </div>
+                
+                <div id="setupError" class="form-error" style="display:none;"></div>
+                
+                <button type="submit" class="btn-auth-submit">
+                    <i class="fas fa-plus"></i> List Server
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user || user.role !== 'owner') {
+            window.location.href = 'login.html';
+        }
+        
+        renderNavAuth();
+        
+        let logoData = '';
+        let bannerData = '';
+        
+        async function init() {
+            const categories = await getCategories();
+            const catSelect = document.getElementById('serverCategory');
+            categories.forEach(cat => {
+                catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+        
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 500000) {
+                alert('Image is too large! Please use an image under 500KB.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (type === 'logo') {
+                    logoData = e.target.result;
+                    document.getElementById('logoPreview').src = logoData;
+                    document.getElementById('logoPreview').style.display = 'block';
+                    document.getElementById('logoPlaceholder').style.display = 'none';
+                    document.getElementById('removeLogo').style.display = 'inline-flex';
+                    document.getElementById('logoUploadArea').style.borderColor = 'var(--gradient-1)';
+                } else {
+                    bannerData = e.target.result;
+                    document.getElementById('bannerPreview').src = bannerData;
+                    document.getElementById('bannerPreview').style.display = 'block';
+                    document.getElementById('bannerPlaceholder').style.display = 'none';
+                    document.getElementById('removeBanner').style.display = 'inline-flex';
+                    document.getElementById('bannerUploadArea').style.borderColor = 'var(--gradient-1)';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeImage(type) {
+            if (type === 'logo') {
+                logoData = '';
+                document.getElementById('logoPreview').style.display = 'none';
+                document.getElementById('logoPlaceholder').style.display = 'block';
+                document.getElementById('removeLogo').style.display = 'none';
+                document.getElementById('logoUpload').value = '';
+                document.getElementById('logoUploadArea').style.borderColor = 'var(--border)';
+            } else {
+                bannerData = '';
+                document.getElementById('bannerPreview').style.display = 'none';
+                document.getElementById('bannerPlaceholder').style.display = 'block';
+                document.getElementById('removeBanner').style.display = 'none';
+                document.getElementById('bannerUpload').value = '';
+                document.getElementById('bannerUploadArea').style.borderColor = 'var(--border)';
+            }
+        }
+        
+        async function submitServer(event) {
+            event.preventDefault();
+            
+            // Check server limit
+            const allServers = await getServers();
+            const myServers = allServers.filter(s => s.owner === user.username);
+            if (myServers.length >= 3) {
+                const errorDiv = document.getElementById('setupError');
+                errorDiv.textContent = 'You have reached the maximum of 3 servers.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const name = document.getElementById('serverName').value.trim();
+            const ip = document.getElementById('serverIP').value.trim();
+            const category = document.getElementById('serverCategory').value;
+            const description = document.getElementById('serverDescription').value.trim();
+            const tags = document.getElementById('serverTags').value.trim();
+            const maxPlayers = document.getElementById('serverMaxPlayers').value;
+            const ownerDiscord = document.getElementById('ownerDiscord').value.trim();
+            const discord = document.getElementById('serverDiscord').value.trim();
+            const errorDiv = document.getElementById('setupError');
+            
+            if (!name || !ip || !category || !description || !ownerDiscord || !tags) {
+                errorDiv.textContent = 'Please fill in all required fields.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Save Discord to user account
+            if (ownerDiscord) {
+                await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ discord: ownerDiscord })
+                });
+                user.discord = ownerDiscord;
+                localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            }
+            
+            const serverId = generateId();
+            
+            await supabaseQuery('servers', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: serverId,
+                    name: name,
+                    ip: ip,
+                    category: category,
+                    description: description,
+                    tags: tags,
+                    max_players: maxPlayers || 50,
+                    players: 0,
+                    owner_discord: ownerDiscord,
+                    discord: discord || '',
+                    logo: logoData || '',
+                    banner: bannerData || '',
+                    owner: user.username,
+                    status: 'Online',
+                    uptime: 'Just listed',
+                    created_at: new Date().toISOString()
+                })
+            });
+            
+            showVoteSetupModal(serverId);
+        }
+        
+        function showVoteSetupModal(serverId) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay active';
+            overlay.id = 'voteSetupModal';
+            overlay.innerHTML = `
+                <div class="modal" style="max-width: 520px;">
+                    <div class="modal-header">
+                        <h3>🎉 Server Listed!</h3>
+                        <button class="modal-close" onclick="skipVoteSetup()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                            Your server has been added! Want players to receive in-game rewards when they vote?
+                        </p>
+                        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+                            <h4 style="margin-bottom: 8px;"><i class="fas fa-info-circle" style="color: var(--gradient-1);"></i> What you need:</h4>
+                            <ol style="color: var(--text-secondary); font-size: 13px; padding-left: 18px; line-height: 2;">
+                                <li>Install <strong style="color: var(--text-primary);">NuVotifier</strong> on your server</li>
+                                <li>Set host to: <code style="background: var(--bg-primary); padding: 2px 8px; border-radius: 4px; color: var(--gradient-1);">pentagi.lol</code></li>
+                                <li>Set port to: <code style="background: var(--bg-primary); padding: 2px 8px; border-radius: 4px; color: var(--gradient-1);">8192</code></li>
+                            </ol>
+                        </div>
+                        <button class="btn-primary btn-full" onclick="skipVoteSetup()">
+                            <i class="fas fa-check"></i> Got it!
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) skipVoteSetup();
+            });
+        }
+        
+        function skipVoteSetup() {
+            const overlay = document.getElementById('voteSetupModal');
+            if (overlay) overlay.remove();
+            window.location.href = 'owner-dashboard.html';
+        }
+        
+        init();
+    </script>
+</body>
+</html>

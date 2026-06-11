@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-page">
+        <div class="auth-card" id="voteCard">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Vote for <span class="gradient-text" id="voteServerName">Server</span></h2>
+            <p class="auth-subtitle">Enter your Minecraft username to cast your vote</p>
+            
+            <div id="voteServerInfo" style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px; text-align: left;"></div>
+            
+            <div class="input-group">
+                <label>Your Minecraft Username</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="voteUsername" placeholder="Enter your in-game name" required minlength="3">
+                </div>
+            </div>
+            
+            <button class="btn-auth-submit" id="voteButton" onclick="submitVote()">
+                <i class="fas fa-thumbs-up"></i> Submit Vote
+            </button>
+            
+            <p style="text-align: center; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+                One vote per person per day. Come back tomorrow to vote again!
+            </p>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        renderNavAuth();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverId = urlParams.get('id');
+        
+        async function init() {
+            const servers = await getServers();
+            const server = servers.find(s => s.id === serverId);
+            
+            if (!server) {
+                document.getElementById('voteCard').innerHTML = `
+                    <div style="text-align:center;padding:20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>
+                        <h2>Server Not Found</h2>
+                        <p style="color:var(--text-muted);margin:8px 0 20px;">This server doesn't exist.</p>
+                        <a href="browse.html" class="btn-primary">Browse Servers</a>
+                    </div>`;
+                return;
+            }
+            
+            document.getElementById('voteServerName').textContent = server.name;
+            document.getElementById('voteServerInfo').innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:40px;color:var(--gradient-1);">${server.logo ? `<img src="${server.logo}" style="width:48px;height:48px;border-radius:8px;">` : '<i class="fas fa-cube"></i>'}</div>
+                    <div>
+                        <strong>${server.name}</strong><br>
+                        <span style="font-size:12px;color:var(--text-muted);">${server.category} • ${server.ip}</span>
+                    </div>
+                </div>`;
+        }
+        
+        async function submitVote() {
+            const username = document.getElementById('voteUsername').value.trim();
+            
+            if (!username || username.length < 3) {
+                alert('Please enter a valid Minecraft username (at least 3 characters).');
+                return;
+            }
+            
+            const votes = await getVotes();
+            
+            if (votes[serverId] && votes[serverId][username]) {
+                const lastVote = new Date(votes[serverId][username]);
+                const now = new Date();
+                const hoursSinceVote = (now - lastVote) / (1000 * 60 * 60);
+                
+                if (hoursSinceVote < 24) {
+                    const hoursLeft = Math.ceil(24 - hoursSinceVote);
+                    alert(`You already voted! Come back in ${hoursLeft} hour(s).`);
+                    return;
+                }
+            }
+            
+            await castVote(serverId, username);
+            
+            document.getElementById('voteButton').textContent = '✓ Vote Recorded!';
+            document.getElementById('voteButton').disabled = true;
+            document.getElementById('voteButton').style.opacity = '0.6';
+            document.getElementById('voteUsername').disabled = true;
+            
+            setTimeout(() => {
+                window.location.href = 'server.html?id=' + serverId;
+            }, 2000);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

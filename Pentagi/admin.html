@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-page">
+        
+        <div class="dashboard-header">
+            <h1>Admin <span class="gradient-text">Panel</span></h1>
+            <p>Manage Pentagi</p>
+        </div>
+        
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="switchTab('accounts')">Accounts</button>
+            <button class="admin-tab" onclick="switchTab('servers')">Servers</button>
+            <button class="admin-tab" onclick="switchTab('categories')">Categories</button>
+            <button class="admin-tab" onclick="switchTab('reports')">Reports</button>
+            <button class="admin-tab" onclick="switchTab('settings')">Settings</button>
+        </div>
+        
+        <!-- ACCOUNTS TAB -->
+        <div class="admin-content active" id="tab-accounts">
+            <h3 style="margin-bottom:16px;">All Accounts</h3>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Discord</th>
+                            <th>Password</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- SERVERS TAB -->
+        <div class="admin-content" id="tab-servers">
+            <h3 style="margin-bottom:16px;">All Servers</h3>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Owner</th>
+                            <th>IP</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serversBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- CATEGORIES TAB -->
+        <div class="admin-content" id="tab-categories">
+            <h3 style="margin-bottom:16px;">Manage Categories</h3>
+            <div style="display:flex;gap:8px;margin-bottom:20px;">
+                <input type="text" id="newCategory" placeholder="New category name" style="flex:1;padding:10px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:50px;color:var(--text-primary);font-family:'Inter',sans-serif;">
+                <button class="btn-primary" onclick="addCategory()"><i class="fas fa-plus"></i> Add</button>
+            </div>
+            <div id="categoriesList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        
+        <!-- REPORTS TAB -->
+        <div class="admin-content" id="tab-reports">
+            <h3 style="margin-bottom:16px;">Server Reports</h3>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Server</th>
+                            <th>Reason</th>
+                            <th>Details</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- SETTINGS TAB -->
+        <div class="admin-content" id="tab-settings">
+            <h3 style="margin-bottom:16px;">Site Settings</h3>
+            <div class="settings-section">
+                <div class="input-group">
+                    <label>Contact Discord Invite</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="settingDiscord" placeholder="https://discord.gg/...">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Contact Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="text" id="settingEmail" placeholder="support@pentagi.com">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user || user.role !== 'admin') {
+            window.location.href = 'index.html';
+        }
+        
+        renderNavAuth();
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            loadTabData(tab);
+        }
+        
+        function loadTabData(tab) {
+            if (tab === 'accounts') loadAccounts();
+            if (tab === 'servers') loadServers();
+            if (tab === 'categories') loadCategories();
+            if (tab === 'reports') loadReports();
+            if (tab === 'settings') loadSettings();
+        }
+        
+        // ACCOUNTS
+        async function loadAccounts() {
+            const users = await getUsers();
+            document.getElementById('accountsBody').innerHTML = users.map(u => `
+                <tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.email}</td>
+                    <td>${u.discord || '--'}</td>
+                    <td><span id="pw-${u.username}" style="filter:blur(4px);cursor:pointer;" onclick="revealPassword('${u.username}')" title="Click to reveal">${u.password}</span></td>
+                    <td><span class="admin-badge ${u.role}">${u.role}</span></td>
+                    <td><span class="admin-badge ${u.status || 'active'}">${u.status || 'active'}</span></td>
+                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                        ${u.role !== 'admin' ? `
+                            <select onchange="changeAccountStatus('${u.username}', this.value)" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:4px 8px;border-radius:4px;font-family:'Inter',sans-serif;margin-right:4px;">
+                                <option value="active" ${u.status === 'active' ? 'selected' : ''}>Active</option>
+                                <option value="under_review" ${u.status === 'under_review' ? 'selected' : ''}>Under Review</option>
+                                <option value="banned" ${u.status === 'banned' ? 'selected' : ''}>Banned</option>
+                            </select>
+                            <button class="btn-admin-action btn-admin-edit" onclick="toggleRole('${u.username}')">Toggle Role</button>
+                            ${u.status === 'under_review' ? `<button class="btn-admin-action btn-admin-unban" onclick="addReviewReason('${u.username}')">Add Reason</button>` : ''}
+                            <button class="btn-admin-action btn-admin-unban" onclick="loginAsUser('${u.username}')" style="background:rgba(16,185,129,0.2);color:var(--green);">Login As</button>
+                            <button class="btn-admin-action btn-admin-delete" onclick="deleteAccount('${u.username}')">Delete</button>
+                        ` : '<span style="color:var(--text-muted);font-size:11px;">Super Admin</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function revealPassword(username) {
+            const span = document.getElementById('pw-' + username);
+            span.style.filter = span.style.filter === 'blur(4px)' ? 'none' : 'blur(4px)';
+        }
+        
+        function loginAsUser(username) {
+            if (!confirm(`Login as "${username}"?`)) return;
+            getUsers().then(users => {
+                const target = users.find(u => u.username === username);
+                if (target) {
+                    localStorage.setItem('pentagiAdminBackup', JSON.stringify(user));
+                    localStorage.setItem('pentagiLoggedIn', JSON.stringify(target));
+                    window.location.href = target.role === 'owner' ? 'owner-dashboard.html' : 'browse.html';
+                }
+            });
+        }
+        
+        async function changeAccountStatus(username, newStatus) {
+            const data = { status: newStatus };
+            if (newStatus === 'under_review') {
+                const reason = prompt('Why is this account under review?');
+                data.review_reason = reason || 'No reason provided';
+            }
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(username)}`, {
+                method: 'PATCH',
+                body: JSON.stringify(data)
+            });
+            loadAccounts();
+        }
+        
+        async function addReviewReason(username) {
+            const reason = prompt('Update review reason:');
+            if (reason) {
+                await supabaseQuery(`accounts?username=eq.${encodeURIComponent(username)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ review_reason: reason })
+                });
+                alert('Review reason updated!');
+            }
+        }
+        
+        async function toggleRole(username) {
+            const users = await getUsers();
+            const u = users.find(u => u.username === username);
+            if (u) {
+                await supabaseQuery(`accounts?username=eq.${encodeURIComponent(username)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ role: u.role === 'owner' ? 'user' : 'owner' })
+                });
+                loadAccounts();
+            }
+        }
+        
+        async function deleteAccount(username) {
+            if (!confirm(`Delete account "${username}" and all their servers?`)) return;
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(username)}`, { method: 'DELETE' });
+            await supabaseQuery(`servers?owner=eq.${encodeURIComponent(username)}`, { method: 'DELETE' });
+            loadAccounts();
+        }
+        
+        // SERVERS
+        async function loadServers() {
+            const servers = await getServers();
+            document.getElementById('serversBody').innerHTML = servers.map(s => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.owner}</td>
+                    <td>${s.ip}</td>
+                    <td>${s.category}</td>
+                    <td>
+                        <select onchange="changeServerStatus('${s.id}', this.value)" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:4px 8px;border-radius:4px;font-family:'Inter',sans-serif;">
+                            <option value="Online" ${s.status === 'Online' ? 'selected' : ''}>Online</option>
+                            <option value="Offline" ${s.status === 'Offline' ? 'selected' : ''}>Offline</option>
+                            <option value="Under Review" ${s.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
+                            <option value="Banned" ${s.status === 'Banned' ? 'selected' : ''}>Banned</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-admin-action btn-admin-edit" onclick="window.location.href='edit-server.html?id=${s.id}&admin=1'">Edit</button>
+                        <button class="btn-admin-action btn-admin-delete" onclick="deleteServer('${s.id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function changeServerStatus(serverId, newStatus) {
+            await supabaseQuery(`servers?id=eq.${encodeURIComponent(serverId)}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: newStatus })
+            });
+        }
+        
+        async function deleteServer(serverId) {
+            if (!confirm('Delete this server?')) return;
+            await supabaseQuery(`servers?id=eq.${encodeURIComponent(serverId)}`, { method: 'DELETE' });
+            loadServers();
+        }
+        
+        // CATEGORIES
+        async function loadCategories() {
+            const cats = await supabaseQuery('categories?select=*') || [];
+            document.getElementById('categoriesList').innerHTML = cats.map(c => `
+                <div style="background:var(--bg-card);border:1px solid var(--border);padding:8px 16px;border-radius:50px;display:flex;align-items:center;gap:8px;font-size:13px;">
+                    ${c.name}
+                    <button onclick="deleteCategory('${c.name}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">&times;</button>
+                </div>
+            `).join('');
+        }
+        
+        async function addCategory() {
+            const name = document.getElementById('newCategory').value.trim();
+            if (!name) return;
+            const cats = await supabaseQuery('categories?select=*') || [];
+            if (cats.find(c => c.name === name)) { alert('Category already exists!'); return; }
+            await supabaseQuery('categories', { method: 'POST', body: JSON.stringify({ name }) });
+            document.getElementById('newCategory').value = '';
+            loadCategories();
+        }
+        
+        async function deleteCategory(name) {
+            if (!confirm(`Delete category "${name}"?`)) return;
+            await supabaseQuery(`categories?name=eq.${encodeURIComponent(name)}`, { method: 'DELETE' });
+            loadCategories();
+        }
+        
+        // REPORTS
+        async function loadReports() {
+            const reports = await getReports();
+            if (reports.length === 0) {
+                document.getElementById('reportsBody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No reports yet.</td></tr>';
+                return;
+            }
+            document.getElementById('reportsBody').innerHTML = reports.map((r, i) => `
+                <tr>
+                    <td><strong>${r.server_name}</strong></td>
+                    <td>${r.reason}</td>
+                    <td>${r.details || '--'}</td>
+                    <td>${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td><button class="btn-admin-action btn-admin-delete" onclick="dismissReport(${r.id})">Dismiss</button></td>
+                </tr>
+            `).join('');
+        }
+        
+        async function dismissReport(id) {
+            await supabaseQuery(`reports?id=eq.${id}`, { method: 'DELETE' });
+            loadReports();
+        }
+        
+        // SETTINGS
+        async function loadSettings() {
+            const settings = await supabaseQuery('settings?select=*') || [];
+            const discordSetting = settings.find(s => s.key === 'contact_discord');
+            const emailSetting = settings.find(s => s.key === 'contact_email');
+            document.getElementById('settingDiscord').value = discordSetting?.value || '';
+            document.getElementById('settingEmail').value = emailSetting?.value || '';
+        }
+        
+        async function saveSettings() {
+            const discord = document.getElementById('settingDiscord').value.trim();
+            const email = document.getElementById('settingEmail').value.trim();
+            await supabaseQuery(`settings?key=eq.contact_discord`, { method: 'PATCH', body: JSON.stringify({ value: discord }) });
+            await supabaseQuery(`settings?key=eq.contact_email`, { method: 'PATCH', body: JSON.stringify({ value: email }) });
+            alert('Settings saved!');
+        }
+        
+        loadAccounts();
+    </script>
+</body>
+</html>

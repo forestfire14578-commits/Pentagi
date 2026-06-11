@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Role - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="auth-page">
+        
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Welcome!</h2>
+            <p class="auth-subtitle">Are you a server owner or just a player?</p>
+            
+            <div class="role-options">
+                <div class="role-card" onclick="selectRole('owner')">
+                    <i class="fas fa-server"></i>
+                    <h3>Server Owner</h3>
+                    <p>I want to list my Minecraft server</p>
+                </div>
+                <div class="role-card" onclick="selectRole('user')">
+                    <i class="fas fa-gamepad"></i>
+                    <h3>Player</h3>
+                    <p>I just want to browse and vote</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+        
+        async function selectRole(role) {
+            // Update in Supabase
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ role: role })
+            });
+            
+            // Update local session
+            user.role = role;
+            localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            
+            // Redirect
+            if (role === 'owner') {
+                window.location.href = 'owner-setup.html';
+            } else {
+                window.location.href = 'browse.html';
+            }
+        }
+    </script>
+</body>
+</html>

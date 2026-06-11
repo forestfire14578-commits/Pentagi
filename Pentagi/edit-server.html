@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Server - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-page" style="padding-top: 80px;">
+        <div class="auth-card" style="max-width: 600px;">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Edit Server</h2>
+            <p class="auth-subtitle">Update your server listing</p>
+            
+            <form class="auth-form" onsubmit="saveServerEdit(event)">
+                
+                <div class="input-group">
+                    <label>Server Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-server"></i>
+                        <input type="text" id="editServerName" placeholder="My Awesome Server" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server IP</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-globe"></i>
+                        <input type="text" id="editServerIP" placeholder="play.myserver.com" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Category</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-tag"></i>
+                        <select id="editServerCategory" required></select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Short Description</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-align-left"></i>
+                        <textarea id="editServerDescription" placeholder="Tell players what makes your server special..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Tags / Keywords</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-tags"></i>
+                        <input type="text" id="editServerTags" placeholder="anti-grief, economy, PvE" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Max Players</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-users"></i>
+                        <input type="number" id="editServerMaxPlayers" placeholder="50" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Your Discord Username</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="editOwnerDiscord" placeholder="yourname" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Discord Invite (optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="editServerDiscord" placeholder="https://discord.gg/yourserver">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Logo</label>
+                    <div class="upload-area" id="editLogoUploadArea" onclick="document.getElementById('editLogoUpload').click()">
+                        <div id="editLogoPlaceholder">
+                            <i class="fas fa-image" style="font-size:28px;color:var(--text-muted);"></i>
+                            <p style="color:var(--text-muted);margin-top:6px;font-size:13px;">Click to upload new logo</p>
+                        </div>
+                        <img id="editLogoPreview" style="display:none;max-width:100%;max-height:120px;border-radius:var(--radius-md);">
+                        <input type="file" id="editLogoUpload" accept="image/*" style="display:none;" onchange="handleEditImageUpload(event, 'logo')">
+                    </div>
+                    <button type="button" class="btn-secondary btn-sm" style="margin-top:6px;display:none;" id="editRemoveLogo" onclick="removeEditImage('logo')">
+                        <i class="fas fa-trash"></i> Remove New Logo
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label>Server Banner</label>
+                    <div class="upload-area" id="editBannerUploadArea" onclick="document.getElementById('editBannerUpload').click()">
+                        <div id="editBannerPlaceholder">
+                            <i class="fas fa-panorama" style="font-size:28px;color:var(--text-muted);"></i>
+                            <p style="color:var(--text-muted);margin-top:6px;font-size:13px;">Click to upload new banner</p>
+                        </div>
+                        <img id="editBannerPreview" style="display:none;max-width:100%;max-height:120px;border-radius:var(--radius-md);">
+                        <input type="file" id="editBannerUpload" accept="image/*" style="display:none;" onchange="handleEditImageUpload(event, 'banner')">
+                    </div>
+                    <button type="button" class="btn-secondary btn-sm" style="margin-top:6px;display:none;" id="editRemoveBanner" onclick="removeEditImage('banner')">
+                        <i class="fas fa-trash"></i> Remove New Banner
+                    </button>
+                </div>
+                
+                <div id="editError" class="form-error" style="display:none;"></div>
+                <div id="editSuccess" class="form-success" style="display:none;"></div>
+                
+                <button type="submit" class="btn-auth-submit">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user || (user.role !== 'owner' && user.role !== 'admin')) {
+            window.location.href = 'login.html';
+        }
+        
+        renderNavAuth();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverId = urlParams.get('id');
+        const isAdmin = urlParams.get('admin') === '1';
+        
+        let editLogoData = '';
+        let editBannerData = '';
+        let server = null;
+        
+        async function init() {
+            const allServers = await getServers();
+            server = allServers.find(s => s.id === serverId && (s.owner === user.username || isAdmin));
+            
+            if (!server) {
+                window.location.href = isAdmin ? 'admin.html' : 'owner-dashboard.html';
+                return;
+            }
+            
+            const categories = await getCategories();
+            const catSelect = document.getElementById('editServerCategory');
+            categories.forEach(cat => {
+                catSelect.innerHTML += `<option value="${cat}" ${server.category === cat ? 'selected' : ''}>${cat}</option>`;
+            });
+            
+            document.getElementById('editServerName').value = server.name;
+            document.getElementById('editServerIP').value = server.ip;
+            document.getElementById('editServerDescription').value = server.description || '';
+            document.getElementById('editServerTags').value = server.tags || '';
+            document.getElementById('editServerMaxPlayers').value = server.max_players || server.maxPlayers || 50;
+            document.getElementById('editOwnerDiscord').value = server.owner_discord || '';
+            document.getElementById('editServerDiscord').value = server.discord || '';
+            
+            if (server.logo) {
+                document.getElementById('editLogoPlaceholder').innerHTML = `<img src="${server.logo}" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);">`;
+            }
+            if (server.banner) {
+                document.getElementById('editBannerPlaceholder').innerHTML = `<img src="${server.banner}" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);">`;
+            }
+        }
+        
+        function handleEditImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file || file.size > 500000) { alert('Image too large! Max 500KB.'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (type === 'logo') {
+                    editLogoData = e.target.result;
+                    document.getElementById('editLogoPreview').src = editLogoData;
+                    document.getElementById('editLogoPreview').style.display = 'block';
+                    document.getElementById('editLogoPlaceholder').style.display = 'none';
+                    document.getElementById('editRemoveLogo').style.display = 'inline-flex';
+                    document.getElementById('editLogoUploadArea').style.borderColor = 'var(--gradient-1)';
+                } else {
+                    editBannerData = e.target.result;
+                    document.getElementById('editBannerPreview').src = editBannerData;
+                    document.getElementById('editBannerPreview').style.display = 'block';
+                    document.getElementById('editBannerPlaceholder').style.display = 'none';
+                    document.getElementById('editRemoveBanner').style.display = 'inline-flex';
+                    document.getElementById('editBannerUploadArea').style.borderColor = 'var(--gradient-1)';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeEditImage(type) {
+            if (type === 'logo') {
+                editLogoData = '';
+                document.getElementById('editLogoPreview').style.display = 'none';
+                document.getElementById('editLogoPlaceholder').style.display = 'block';
+                document.getElementById('editRemoveLogo').style.display = 'none';
+                document.getElementById('editLogoUpload').value = '';
+                document.getElementById('editLogoUploadArea').style.borderColor = 'var(--border)';
+            } else {
+                editBannerData = '';
+                document.getElementById('editBannerPreview').style.display = 'none';
+                document.getElementById('editBannerPlaceholder').style.display = 'block';
+                document.getElementById('editRemoveBanner').style.display = 'none';
+                document.getElementById('editBannerUpload').value = '';
+                document.getElementById('editBannerUploadArea').style.borderColor = 'var(--border)';
+            }
+        }
+        
+        async function saveServerEdit(event) {
+            event.preventDefault();
+            
+            const errorDiv = document.getElementById('editError');
+            const successDiv = document.getElementById('editSuccess');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            const data = {
+                name: document.getElementById('editServerName').value.trim(),
+                ip: document.getElementById('editServerIP').value.trim(),
+                category: document.getElementById('editServerCategory').value,
+                description: document.getElementById('editServerDescription').value.trim(),
+                tags: document.getElementById('editServerTags').value.trim(),
+                max_players: parseInt(document.getElementById('editServerMaxPlayers').value) || 50,
+                owner_discord: document.getElementById('editOwnerDiscord').value.trim(),
+                discord: document.getElementById('editServerDiscord').value.trim()
+            };
+            
+            if (!data.name || !data.ip || !data.category || !data.description || !data.tags) {
+                errorDiv.textContent = 'Please fill in all required fields.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (editLogoData) data.logo = editLogoData;
+            if (editBannerData) data.banner = editBannerData;
+            
+            await supabaseQuery(`servers?id=eq.${encodeURIComponent(serverId)}`, {
+                method: 'PATCH',
+                body: JSON.stringify(data)
+            });
+            
+            successDiv.textContent = 'Server updated successfully! Redirecting...';
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                window.location.href = isAdmin ? 'admin.html' : 'owner-dashboard.html';
+            }, 1500);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pentagi - Minecraft Server List</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <!-- ========== COOKIE CONSENT ========== -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <div>
+                <i class="fas fa-cookie-bite" style="color: #F59E0B; font-size: 20px;"></i>
+                <span style="font-size: 13px; color: var(--text-secondary); margin-left: 8px;">
+                    We use cookies to improve your experience. By using Pentagi, you agree to our 
+                    <a href="tos.html" style="color: var(--gradient-1);">Terms of Service</a>.
+                </span>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn-primary btn-sm" onclick="acceptCookies()">Accept</button>
+                <button class="btn-secondary btn-sm" onclick="declineCookies()">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-logo" id="floatingLogo">
+        <i class="fas fa-cube"></i>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-fullscreen">
+        <div class="hero-content">
+            <div class="hero-logo-large">
+                <i class="fas fa-cube"></i>
+            </div>
+            <h1 class="hero-title">PENTAGI</h1>
+            <p class="hero-description">
+                The honest Minecraft server list. No dead links, no abandoned servers. 
+                Just real communities waiting for you.
+            </p>
+            <div class="hero-buttons">
+                <a href="browse.html" class="btn-primary">
+                    <i class="fas fa-search"></i> Browse Servers
+                </a>
+                <a href="login.html" class="btn-secondary">
+                    <i class="fas fa-plus"></i> Add Your Server
+                </a>
+            </div>
+        </div>
+        <div class="hero-bg-glow"></div>
+    </section>
+
+    <!-- ========== REVIEWS CAROUSEL ========== -->
+    <section class="reviews">
+        <div class="section-header">
+            <h2>What People <span class="gradient-text">Say</span></h2>
+            <p>Reviews from our community</p>
+        </div>
+        <div class="review-track" id="reviewTrack"></div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-logo">
+            <span class="logo-icon"><i class="fas fa-cube"></i></span>
+            <span class="logo-text">PENTAGI</span>
+        </div>
+        <p>&copy; 2026 Pentagi. All rights reserved. <a href="tos.html" style="color: var(--text-muted);">Terms of Service</a></p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const floatingLogo = document.getElementById('floatingLogo');
+        window.addEventListener('scroll', function() {
+            floatingLogo.style.opacity = window.scrollY > 100 ? '1' : '0';
+        });
+        
+        renderNavAuth();
+        
+        if (localStorage.getItem('pentagiCookies')) {
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+        
+        function acceptCookies() {
+            localStorage.setItem('pentagiCookies', 'accepted');
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+        
+        function declineCookies() {
+            localStorage.setItem('pentagiCookies', 'declined');
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+        
+        const reviews = [
+            { color: 'linear-gradient(135deg,#6C63FF,#9D4EDD)', stars: 5, text: '"Finally a server list that actually works! Found my new favorite survival server in minutes. No dead links, no BS."' },
+            { color: 'linear-gradient(135deg,#10B981,#059669)', stars: 5, text: '"As a server owner, Pentagi is the only list I trust. My server gets real players, not bots. The vote system is fair."' },
+            { color: 'linear-gradient(135deg,#F59E0B,#D97706)', stars: 4, text: '"The category filters make it so easy to find exactly what I want. Way better than other server lists."' },
+            { color: 'linear-gradient(135deg,#EF4444,#DC2626)', stars: 5, text: '"Been using Pentagi for weeks now. The live player counts are accurate and the community is awesome."' },
+            { color: 'linear-gradient(135deg,#8B5CF6,#7C3AED)', stars: 5, text: '"Honest server list finally. No pay-to-win rankings, just real votes from real players. Love it."' },
+            { color: 'linear-gradient(135deg,#EC4899,#BE185D)', stars: 4, text: '"Clean design, easy to use. Found a great Skyblock server through Pentagi. Highly recommend!"' },
+        ];
+        
+        const track = document.getElementById('reviewTrack');
+        const allReviews = [...reviews, ...reviews];
+        
+        track.innerHTML = allReviews.map(r => `
+            <div class="review-card">
+                <div class="review-card-header">
+                    <div class="review-avatar" style="background:${r.color};"><i class="fas fa-user"></i></div>
+                    <div class="review-stars">${'⭐'.repeat(r.stars)}</div>
+                </div>
+                <p class="review-text">${r.text}</p>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div style="max-width: 800px; margin: 0 auto; padding: 100px 24px 60px; position: relative; z-index: 1;">
+        
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">Terms of <span class="gradient-text">Service</span></h1>
+        <p style="color: var(--text-muted); margin-bottom: 32px;">Last updated: June 2026</p>
+        
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 32px; display: flex; flex-direction: column; gap: 24px;">
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">1. Acceptance of Terms</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">By creating an account or using Pentagi, you agree to these Terms of Service. If you do not agree, do not use our services.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">2. Account Responsibility</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">You are responsible for maintaining the security of your account. You must not share your account credentials. One person per account. You must provide accurate information when creating an account.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">3. Server Listings</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">Server owners are solely responsible for the content they submit, including server names, descriptions, images, and tags. You must not list servers containing illegal content, malware, phishing, hate speech, or inappropriate material. Pentagi reserves the right to remove any server listing at any time without notice.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">4. Voting System</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">Vote manipulation, botting, or any attempt to artificially inflate votes is strictly prohibited. Accounts found engaging in vote manipulation will be banned and all associated servers removed.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">5. Content Guidelines</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">You agree not to submit content that is unlawful, harmful, threatening, abusive, harassing, defamatory, vulgar, obscene, invasive of privacy, hateful, or racially objectionable. This applies to server names, descriptions, logos, banners, and all other submitted content.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">6. Termination</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">Pentagi reserves the right to suspend or terminate any account or server listing at any time, for any reason, without prior notice. Accounts may be placed under review or banned at administrator discretion.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">7. Limitation of Liability</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">Pentagi is not responsible for the content, actions, or availability of any listed Minecraft server. We do not guarantee server uptime, accuracy of information, or player counts. Use the service at your own risk. Pentagi is provided "as is" without warranties of any kind.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">8. Changes to Terms</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">We reserve the right to modify these terms at any time. Continued use of Pentagi after changes constitutes acceptance of the new terms. It is your responsibility to review the Terms of Service periodically.</p>
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 8px;">9. Contact</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.8;">For questions about these Terms, join our Discord server or contact us at <span id="tosEmail" style="color: var(--gradient-1);"></span>.</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">
+            <span class="logo-icon"><i class="fas fa-cube"></i></span>
+            <span class="logo-text">PENTAGI</span>
+        </div>
+        <p>&copy; 2026 Pentagi. All rights reserved. <a href="tos.html" style="color: var(--text-muted);">Terms of Service</a></p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        renderNavAuth();
+        document.getElementById('tosEmail').textContent = localStorage.getItem('pentagiContactEmail') || 'support@pentagi.com';
+    </script>
+</body>
+</html>

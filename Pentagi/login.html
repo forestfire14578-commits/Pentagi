@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="auth-page">
+        
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Welcome Back</h2>
+            <p class="auth-subtitle">Log in to browse and vote for servers</p>
+            
+            <form class="auth-form" onsubmit="handleLogin(event)">
+                
+                <div class="input-group">
+                    <label>Email or Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="loginIdentifier" placeholder="Enter your email or username" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <div id="loginError" class="form-error" style="display:none;"></div>
+
+                <div class="login-options" style="text-align:right;margin-bottom:8px;">
+                    <a href="forgot-password.html" class="forgot-password" style="font-size:12px;color:var(--gradient-1);text-decoration:none;">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn-auth-submit">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                
+                <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px;">
+                    By signing in, you agree to our <a href="tos.html" style="color:var(--gradient-1);">Terms of Service</a>
+                </p>
+            </form>
+            
+            
+            <div class="auth-divider"><span>or</span></div>
+            
+            <p class="auth-link">
+                Don't have an account? <a href="signup.html">Sign up</a>
+            </p>
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch('https://liclveedljxfusiikyvi.supabase.co/rest/v1/accounts?select=*', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpY2x2ZWVkbGp4ZnVzaWlreXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2Mzk5NjIsImV4cCI6MjA5NjIxNTk2Mn0.aQAvI35PHrtjqTBsFYIX2O_SznXDsTpTTmOkuerNFZo',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpY2x2ZWVkbGp4ZnVzaWlreXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2Mzk5NjIsImV4cCI6MjA5NjIxNTk2Mn0.aQAvI35PHrtjqTBsFYIX2O_SznXDsTpTTmOkuerNFZo'
+                    }
+                });
+                
+                const users = await response.json();
+                
+                const user = users.find(u => 
+                    u.email.toLowerCase() === identifier || 
+                    u.username.toLowerCase() === identifier
+                );
+                
+                if (!user) {
+                    showError(errorDiv, 'No account found.');
+                    return;
+                }
+                
+                if (user.status === 'banned') {
+                    showError(errorDiv, 'This account has been banned.');
+                    return;
+                }
+                
+                if (user.password !== password) {
+                    showError(errorDiv, 'Incorrect password.');
+                    return;
+                }
+                
+                if (user.status === 'under_review') {
+                    localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+                    window.location.href = 'lockdown.html';
+                    return;
+                }
+                
+                localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+                
+                if (user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (user.role === 'owner') {
+                    window.location.href = 'owner-dashboard.html';
+                } else {
+                    window.location.href = 'browse.html';
+                }
+            } catch (error) {
+                showError(errorDiv, 'Connection error. Try again.');
+            }
+        }
+        
+        function showError(div, message) {
+            div.textContent = message;
+            div.style.display = 'block';
+            setTimeout(() => { div.style.display = 'none'; }, 4000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Servers - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="browse-page">
+        
+        <div class="browse-header">
+            <h1>Browse <span class="gradient-text">Servers</span></h1>
+            <p>Find your next Minecraft adventure</p>
+        </div>
+        
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, IP, or tags..." oninput="filterServers()">
+        </div>
+        
+        <div class="sort-bar">
+            <span style="font-size:13px;color:var(--text-muted);margin-right:8px;">Sort by:</span>
+            <button class="sort-btn active" onclick="sortServers('votes')">Most Votes</button>
+            <button class="sort-btn" onclick="sortServers('newest')">Newest</button>
+            <button class="sort-btn" onclick="sortServers('players')">Most Players</button>
+        </div>
+        
+        <div class="category-filters" id="categoryFilters">
+            <button class="category-tag active" onclick="filterByCategory('all')">All</button>
+        </div>
+        
+        <div class="browse-grid" id="browseGrid"></div>
+        
+        <div class="no-results" id="noResults" style="display:none;">
+            <i class="fas fa-search"></i>
+            <h3>No servers found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+        
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">
+            <span class="logo-icon"><i class="fas fa-cube"></i></span>
+            <span class="logo-text">PENTAGI</span>
+        </div>
+        <p>&copy; 2026 Pentagi. All rights reserved. <a href="tos.html" style="color: var(--text-muted);">Terms of Service</a></p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        renderNavAuth();
+        
+        let currentCategory = 'all';
+        let currentSort = 'votes';
+        let allServers = [];
+        
+        async function init() {
+            // Load categories
+            const categories = await getCategories();
+            categories.forEach(cat => {
+                document.getElementById('categoryFilters').innerHTML += `<button class="category-tag" onclick="filterByCategory('${cat}')">${cat}</button>`;
+            });
+            
+            // Load servers
+            allServers = await getServers();
+            renderServers();
+        }
+        
+        function filterServers() { renderServers(); }
+        
+        function sortServers(sort) {
+            currentSort = sort;
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderServers();
+        }
+        
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-tag').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === category || (category === 'all' && btn.textContent === 'All')) btn.classList.add('active');
+            });
+            renderServers();
+        }
+        
+        async function renderServers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('browseGrid');
+            const noResults = document.getElementById('noResults');
+            
+            let filtered = allServers;
+            if (currentCategory !== 'all') filtered = filtered.filter(s => s.category === currentCategory);
+            if (searchTerm) {
+                filtered = filtered.filter(s => 
+                    s.name.toLowerCase().includes(searchTerm) || 
+                    s.ip.toLowerCase().includes(searchTerm) ||
+                    s.category.toLowerCase().includes(searchTerm) ||
+                    s.description.toLowerCase().includes(searchTerm) ||
+                    (s.tags && s.tags.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (filtered.length === 0) { grid.innerHTML = ''; noResults.style.display = 'block'; return; }
+            noResults.style.display = 'none';
+            
+            // Sort
+            const votes = await getVotes();
+            filtered.sort((a, b) => {
+                if (a.status === 'Online' && b.status !== 'Online') return -1;
+                if (a.status !== 'Online' && b.status === 'Online') return 1;
+                
+                if (currentSort === 'newest') {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                } else if (currentSort === 'players') {
+                    return (b.players || 0) - (a.players || 0);
+                } else {
+                    const aVotes = votes[a.id] ? Object.keys(votes[a.id]).length : 0;
+                    const bVotes = votes[b.id] ? Object.keys(votes[b.id]).length : 0;
+                    return bVotes - aVotes;
+                }
+            });
+            
+            // Show skeletons first
+            const skeletonCount = filtered.length || 6;
+            grid.innerHTML = Array(Math.min(skeletonCount, 6)).fill(0).map(() => `
+                <div class="server-card-skeleton">
+                    <div class="skeleton skeleton-banner"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-header">
+                            <div class="skeleton skeleton-logo"></div>
+                            <div style="flex:1;">
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text short"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton skeleton-text" style="width:90%;"></div>
+                        <div class="skeleton skeleton-text" style="width:60%;margin-bottom:12px;"></div>
+                        <div style="margin-bottom:12px;">
+                            <div class="skeleton skeleton-tag"></div>
+                            <div class="skeleton skeleton-tag"></div>
+                            <div class="skeleton skeleton-tag"></div>
+                        </div>
+                        <div class="skeleton-stats">
+                            <div class="skeleton skeleton-stat"></div>
+                            <div class="skeleton skeleton-stat"></div>
+                            <div class="skeleton skeleton-stat"></div>
+                        </div>
+                        <div class="skeleton-bottom">
+                            <div class="skeleton skeleton-stat" style="width:80px;"></div>
+                            <div class="skeleton skeleton-btn"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Load real cards
+            setTimeout(async () => {
+                const cardsHTML = await Promise.all(filtered.map(server => createServerCardHTML(server)));
+                grid.innerHTML = cardsHTML.join('');
+                
+                // Load live player counts
+                filtered.forEach(server => {
+                    if (server.status === 'Online') {
+                        queryServer(server.ip).then(data => {
+                            const playerSpan = document.getElementById('players-' + server.id);
+                            if (playerSpan && data.online) {
+                                playerSpan.textContent = `${data.players}/${data.maxPlayers}`;
+                            } else if (playerSpan) {
+                                playerSpan.textContent = '0/0';
+                            }
+                        });
+                    } else {
+                        const playerSpan = document.getElementById('players-' + server.id);
+                        if (playerSpan) playerSpan.textContent = '0/0';
+                    }
+                });
+            }, 800);
+        }
+        
+        init();
+    </script>
+</body>
+</html>

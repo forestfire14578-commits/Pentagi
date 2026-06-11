@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="contact-page">
+        <div class="contact-card">
+            <div class="logo-icon">
+                <i class="fas fa-cube"></i>
+            </div>
+            <h2>Need Help?</h2>
+            <p>Join our Discord server for support, questions, or to report issues.</p>
+            
+            <div class="contact-options">
+                <a href="#" class="btn-discord-large" id="discordLink" target="_blank">
+                    <i class="fab fa-discord"></i> Join Discord Server
+                </a>
+                <a href="#" class="btn-email-large" id="emailLink">
+                    <i class="fas fa-envelope"></i> Send Email
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">
+            <span class="logo-icon"><i class="fas fa-cube"></i></span>
+            <span class="logo-text">PENTAGI</span>
+        </div>
+        <p>&copy; 2026 Pentagi. All rights reserved. The honest Minecraft server list.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        renderNavAuth();
+        
+        const discordLink = localStorage.getItem('pentagiContactDiscord') || 'https://discord.gg/atmGrBZKGM';
+        const emailLink = localStorage.getItem('pentagiContactEmail') || 'support@pentagi.com';
+        document.getElementById('discordLink').href = discordLink;
+        document.getElementById('emailLink').href = 'mailto:' + emailLink;
+    </script>
+</body>
+</html>

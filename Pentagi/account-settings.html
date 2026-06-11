@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        
+        <div class="dashboard-header">
+            <h1>Account <span class="gradient-text">Settings</span></h1>
+        </div>
+        
+        <div style="max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Profile Picture -->
+            <div class="settings-section">
+                <h3>Profile Picture</h3>
+                <div style="display:flex;align-items:center;gap:20px;">
+                    <div id="pfpPreview" style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--gradient-1),var(--gradient-2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px;color:white;overflow:hidden;">
+                        <span id="pfpLetter">U</span>
+                        <img id="pfpImage" style="display:none;width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    <div>
+                        <button class="btn-primary btn-sm" onclick="document.getElementById('pfpUpload').click()">
+                            <i class="fas fa-camera"></i> Change Picture
+                        </button>
+                        <button class="btn-secondary btn-sm" onclick="removePfp()" id="removePfpBtn" style="display:none;">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                        <input type="file" id="pfpUpload" accept="image/*" style="display:none;" onchange="handlePfpUpload(event)">
+                        <p style="color:var(--text-muted);font-size:11px;margin-top:6px;">Max 200KB • JPG, PNG, GIF</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Info -->
+            <div class="settings-section">
+                <h3>Profile Information</h3>
+                <div class="input-group">
+                    <label>Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="displayUsername" readonly style="opacity:0.7;">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="displayEmail" readonly style="opacity:0.7;">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Discord</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-discord"></i>
+                        <input type="text" id="settingsDiscord" placeholder="yourname">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="saveProfileInfo()">
+                    <i class="fas fa-save"></i> Save Info
+                </button>
+                <div id="infoMsg" class="form-success" style="display:none; margin-top: 10px;"></div>
+            </div>
+            
+            <!-- Change Username -->
+            <div class="settings-section">
+                <h3>Change Username</h3>
+                <div class="input-group">
+                    <label>New Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-edit"></i>
+                        <input type="text" id="newUsername" placeholder="Enter new username">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="changeUsername()">
+                    <i class="fas fa-save"></i> Update Username
+                </button>
+                <div id="usernameMsg" class="form-success" style="display:none; margin-top: 10px;"></div>
+            </div>
+            
+            <!-- Change Password -->
+            <div class="settings-section">
+                <h3>Change Password</h3>
+                <div class="input-group">
+                    <label>Current Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="newPassword" placeholder="Min 8 chars, 1 uppercase, 1 number" minlength="8">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Confirm New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-check"></i>
+                        <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="changePassword()">
+                    <i class="fas fa-save"></i> Update Password
+                </button>
+                <div id="passwordMsg" class="form-success" style="display:none; margin-top: 10px;"></div>
+                <div id="passwordError" class="form-error" style="display:none; margin-top: 10px;"></div>
+            </div>
+            
+            <!-- Delete Account -->
+            <div class="settings-section danger">
+                <h3>Delete Account</h3>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">This will permanently delete your account, all your server listings, and all data.</p>
+                <div class="input-group">
+                    <label>Type your password to confirm</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="deletePassword" placeholder="Enter your password">
+                    </div>
+                </div>
+                <button class="btn-danger" onclick="deleteAccount()">
+                    <i class="fas fa-trash"></i> Delete My Account
+                </button>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user) { window.location.href = 'login.html'; }
+        
+        renderNavAuth();
+        
+        document.getElementById('pfpLetter').textContent = user.username.charAt(0).toUpperCase();
+        document.getElementById('displayUsername').value = user.username;
+        document.getElementById('displayEmail').value = user.email;
+        document.getElementById('settingsDiscord').value = user.discord || '';
+        
+        if (user.pfp) {
+            document.getElementById('pfpLetter').style.display = 'none';
+            document.getElementById('pfpImage').src = user.pfp;
+            document.getElementById('pfpImage').style.display = 'block';
+            document.getElementById('removePfpBtn').style.display = 'inline-flex';
+        }
+        
+        function handlePfpUpload(event) {
+            const file = event.target.files[0];
+            if (!file || file.size > 200000) { alert('Image too large! Max 200KB.'); return; }
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                user.pfp = e.target.result;
+                localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+                await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                    method: 'PATCH', body: JSON.stringify({ pfp: user.pfp })
+                });
+                document.getElementById('pfpLetter').style.display = 'none';
+                document.getElementById('pfpImage').src = user.pfp;
+                document.getElementById('pfpImage').style.display = 'block';
+                document.getElementById('removePfpBtn').style.display = 'inline-flex';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        async function removePfp() {
+            user.pfp = '';
+            localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                method: 'PATCH', body: JSON.stringify({ pfp: '' })
+            });
+            document.getElementById('pfpLetter').style.display = 'block';
+            document.getElementById('pfpImage').style.display = 'none';
+            document.getElementById('removePfpBtn').style.display = 'none';
+        }
+        
+        async function saveProfileInfo() {
+            const discord = document.getElementById('settingsDiscord').value.trim();
+            user.discord = discord;
+            localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                method: 'PATCH', body: JSON.stringify({ discord })
+            });
+            const msg = document.getElementById('infoMsg');
+            msg.textContent = 'Profile updated!'; msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+        
+        async function changeUsername() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const msgDiv = document.getElementById('usernameMsg');
+            if (!newUsername || newUsername.length < 3) {
+                msgDiv.className = 'form-error'; msgDiv.textContent = 'Username must be at least 3 characters.'; msgDiv.style.display = 'block'; return;
+            }
+            const users = await getUsers();
+            if (users.find(u => u.username.toLowerCase() === newUsername.toLowerCase() && u.username !== user.username)) {
+                msgDiv.className = 'form-error'; msgDiv.textContent = 'Username already taken!'; msgDiv.style.display = 'block'; return;
+            }
+            const oldUsername = user.username;
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(oldUsername)}`, {
+                method: 'PATCH', body: JSON.stringify({ username: newUsername })
+            });
+            await supabaseQuery(`servers?owner=eq.${encodeURIComponent(oldUsername)}`, {
+                method: 'PATCH', body: JSON.stringify({ owner: newUsername })
+            }, { headers: { 'Prefer': 'return=minimal' } });
+            user.username = newUsername;
+            localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            msgDiv.className = 'form-success'; msgDiv.textContent = 'Username updated! Refreshing...'; msgDiv.style.display = 'block';
+            setTimeout(() => location.reload(), 1500);
+        }
+        
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+            const msgDiv = document.getElementById('passwordMsg');
+            errorDiv.style.display = 'none'; msgDiv.style.display = 'none';
+            
+            if (currentPassword !== user.password) { errorDiv.textContent = 'Current password is incorrect.'; errorDiv.style.display = 'block'; return; }
+            if (newPassword.length < 8) { errorDiv.textContent = 'Password must be at least 8 characters.'; errorDiv.style.display = 'block'; return; }
+            if (!/[A-Z]/.test(newPassword)) { errorDiv.textContent = 'Password must contain at least one uppercase letter.'; errorDiv.style.display = 'block'; return; }
+            if (!/[0-9]/.test(newPassword)) { errorDiv.textContent = 'Password must contain at least one number.'; errorDiv.style.display = 'block'; return; }
+            if (newPassword !== confirmNewPassword) { errorDiv.textContent = 'New passwords do not match.'; errorDiv.style.display = 'block'; return; }
+            
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, {
+                method: 'PATCH', body: JSON.stringify({ password: newPassword })
+            });
+            user.password = newPassword;
+            localStorage.setItem('pentagiLoggedIn', JSON.stringify(user));
+            msgDiv.textContent = 'Password updated successfully!'; msgDiv.style.display = 'block';
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+        
+        async function deleteAccount() {
+            const password = document.getElementById('deletePassword').value;
+            if (password !== user.password) { alert('Incorrect password!'); return; }
+            if (!confirm('WARNING: This will permanently delete your account and ALL your server listings. Are you SURE?')) return;
+            if (!confirm('FINAL WARNING: This cannot be undone. Continue?')) return;
+            
+            await supabaseQuery(`accounts?username=eq.${encodeURIComponent(user.username)}`, { method: 'DELETE' });
+            await supabaseQuery(`servers?owner=eq.${encodeURIComponent(user.username)}`, { method: 'DELETE' });
+            localStorage.removeItem('pentagiLoggedIn');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

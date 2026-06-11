@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Servers - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-page">
+        
+        <div class="dashboard-header">
+            <div>
+                <h1>Welcome, <span class="gradient-text" id="ownerName">Owner</span></h1>
+                <p>You have <span id="serverCount">0</span>/3 server(s) listed</p>
+            </div>
+            <a href="owner-setup.html" class="btn-primary" id="addServerBtn">
+                <i class="fas fa-plus"></i> Add New Server
+            </a>
+        </div>
+        
+        <div class="dashboard-grid" id="ownerServers"></div>
+        
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <i class="fas fa-server"></i>
+            <h3>No Servers Yet</h3>
+            <p>Add your first Minecraft server to get started!</p>
+            <a href="owner-setup.html" class="btn-primary">
+                <i class="fas fa-plus"></i> Add Server
+            </a>
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        if (!user || user.role !== 'owner') {
+            window.location.href = 'login.html';
+        }
+        
+        document.getElementById('ownerName').textContent = user.username;
+        renderNavAuth();
+        
+        async function init() {
+            const allServers = await getServers();
+            const myServers = allServers.filter(s => s.owner === user.username);
+            const votes = await getVotes();
+            
+            document.getElementById('serverCount').textContent = myServers.length;
+            
+            if (myServers.length >= 3) {
+                const btn = document.getElementById('addServerBtn');
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+                btn.textContent = 'Max Servers Reached (3/3)';
+                btn.href = '#';
+                btn.onclick = function(e) { e.preventDefault(); alert('You have reached the maximum of 3 servers.'); };
+            }
+            
+            if (myServers.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('ownerServers').innerHTML = '';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('ownerServers').innerHTML = myServers.map(server => {
+                    const voteCount = votes[server.id] ? Object.keys(votes[server.id]).length : 0;
+                    const statusClass = server.status === 'Online' ? 'green' : server.status === 'Banned' ? 'red' : server.status === 'Under Review' ? 'orange' : 'red';
+                    const voteLink = window.location.origin + '/vote.html?id=' + server.id;
+                    
+                    return `
+                        <div class="server-card-owner">
+                            <div class="server-card-top">
+                                <div class="server-logo">${server.logo ? `<img src="${server.logo}">` : '<i class="fas fa-cube"></i>'}</div>
+                                <div class="server-card-info">
+                                    <div class="server-card-name">${server.name}</div>
+                                    <div class="server-card-category">${server.category}</div>
+                                </div>
+                            </div>
+                            <div class="server-card-stats">
+                                <div class="server-stat"><i class="fas fa-globe"></i> ${server.ip}</div>
+                                <div class="server-stat"><i class="fas fa-users"></i> ${server.players || 0}/${server.max_players || server.maxPlayers || 50}</div>
+                                <div class="server-stat"><i class="fas fa-thumbs-up"></i> ${voteCount} votes</div>
+                            </div>
+                            <div class="server-card-bottom">
+                                <div class="server-status">
+                                    <span class="status-dot ${statusClass}"></span>
+                                    <span class="status-text ${statusClass}-text">${server.status}</span>
+                                </div>
+                            </div>
+                            <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; margin-top: 12px;">
+                                <span style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:6px;">VOTE LINK (share with players)</span>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="text" value="${voteLink}" readonly style="flex:1;background:var(--bg-primary);border:1px solid var(--border);color:var(--text-secondary);padding:6px 10px;border-radius:20px;font-size:11px;font-family:monospace;" id="voteLink-${server.id}">
+                                    <button onclick="copyVoteLink('${server.id}')" style="background:var(--gradient-1);border:none;color:white;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:11px;white-space:nowrap;"><i class="fas fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="owner-card-actions" style="margin-top:12px;">
+                                <a href="server.html?id=${server.id}" class="btn-primary">View</a>
+                                <a href="edit-server.html?id=${server.id}" class="btn-secondary">Edit</a>
+                                <button class="btn-secondary" onclick="deleteMyServer('${server.id}')"><i class="fas fa-trash"></i> Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function copyVoteLink(serverId) {
+            const input = document.getElementById('voteLink-' + serverId);
+            input.select();
+            navigator.clipboard.writeText(input.value).then(() => {
+                alert('Vote link copied! Share this with your players.');
+            });
+        }
+        
+        async function deleteMyServer(serverId) {
+            if (confirm('Delete this server listing? This cannot be undone.')) {
+                await supabaseQuery(`servers?id=eq.${encodeURIComponent(serverId)}`, { method: 'DELETE' });
+                location.reload();
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>

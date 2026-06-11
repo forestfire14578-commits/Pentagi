@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="auth-page">
+        
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        
+        <div class="auth-card" id="signupStep1">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Create Account</h2>
+            <p class="auth-subtitle">Join Pentagi to vote and list your servers</p>
+            
+            <form class="auth-form" onsubmit="handleSignup(event)">
+                
+                <div class="input-group">
+                    <label>Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signupUsername" placeholder="Choose a username" required minlength="3" maxlength="16" pattern="[a-zA-Z0-9_]+">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupPassword" placeholder="Min 8 chars, 1 uppercase, 1 number" required minlength="8">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupConfirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                </div>
+                
+                <div id="signupError" class="form-error" style="display:none;"></div>
+                
+                <button type="submit" class="btn-auth-submit" id="signupBtn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+                
+                <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:12px;">
+                    By creating an account, you agree to our <a href="tos.html" style="color:var(--gradient-1);">Terms of Service</a>
+                </p>
+            </form>
+            
+            <div class="auth-divider"><span>or</span></div>
+            
+            <p class="auth-link">
+                Already have an account? <a href="login.html">Log in</a>
+            </p>
+        </div>
+        
+        <!-- STEP 2: VERIFICATION -->
+        <div class="auth-card" id="signupStep2" style="display:none;">
+            <div class="auth-logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </div>
+            
+            <h2>Check Your Email</h2>
+            <p class="auth-subtitle">We sent a 6-digit code to <strong id="displayEmail" style="color: var(--text-primary);">email@example.com</strong></p>
+            
+            <div class="input-group">
+                <label>Enter Verification Code</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-key"></i>
+                    <input type="text" id="verificationInput" placeholder="000000" maxlength="6" oninput="autoVerify()">
+                </div>
+            </div>
+            
+            <div id="verifyError" class="form-error" style="display:none;"></div>
+            
+            <button class="btn-auth-submit" onclick="verifyCode()">
+                <i class="fas fa-check"></i> Verify & Continue
+            </button>
+            
+            <button class="btn-resend" onclick="resendCode()">
+                <i class="fas fa-redo"></i> Resend Code
+            </button>
+        </div>
+        
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const MAIL_WORKER = 'https://pentagi-mail.forestfire14578.workers.dev';
+        let currentVerificationCode = '';
+        let pendingUser = null;
+        
+        async function handleSignup(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('signupUsername').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const errorDiv = document.getElementById('signupError');
+            const btn = document.getElementById('signupBtn');
+            
+            errorDiv.style.display = 'none';
+            
+            if (password !== confirmPassword) {
+                showError(errorDiv, 'Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showError(errorDiv, 'Password must be at least 8 characters!');
+                return;
+            }
+            
+            if (!/[A-Z]/.test(password)) {
+                showError(errorDiv, 'Password must contain at least one uppercase letter!');
+                return;
+            }
+            
+            if (!/[0-9]/.test(password)) {
+                showError(errorDiv, 'Password must contain at least one number!');
+                return;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError(errorDiv, 'Username can only contain letters, numbers, and underscores!');
+                return;
+            }
+            
+            // Check for existing users in Supabase
+            const users = await getUsers();
+            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showError(errorDiv, 'Username already taken!');
+                return;
+            }
+            if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                showError(errorDiv, 'Email already registered!');
+                return;
+            }
+            
+            currentVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            pendingUser = { username, email, password };
+            
+            btn.textContent = 'Sending code...';
+            btn.disabled = true;
+            
+            fetch(MAIL_WORKER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code: currentVerificationCode, username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('signupStep1').style.display = 'none';
+                    document.getElementById('signupStep2').style.display = 'block';
+                    document.getElementById('displayEmail').textContent = email;
+                    document.getElementById('verificationInput').value = '';
+                } else {
+                    showError(errorDiv, 'Failed to send email. Try again.');
+                    btn.textContent = 'Create Account';
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showError(errorDiv, 'Email service error. Try again later.');
+                btn.textContent = 'Create Account';
+                btn.disabled = false;
+            });
+        }
+        
+        function autoVerify() {
+            if (document.getElementById('verificationInput').value.length === 6) verifyCode();
+        }
+        
+        async function verifyCode() {
+            const input = document.getElementById('verificationInput').value.trim();
+            
+            if (input === currentVerificationCode) {
+                await supabaseQuery('accounts', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username: pendingUser.username,
+                        email: pendingUser.email,
+                        password: pendingUser.password,
+                        role: 'user',
+                        status: 'active'
+                    })
+                });
+                
+                localStorage.setItem('pentagiLoggedIn', JSON.stringify({
+                    username: pendingUser.username,
+                    email: pendingUser.email,
+                    password: pendingUser.password,
+                    role: 'user',
+                    status: 'active'
+                }));
+                
+                window.location.href = 'role-select.html';
+            } else {
+                showError(document.getElementById('verifyError'), 'Invalid verification code!');
+            }
+        }
+        
+        function resendCode() {
+            currentVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('verificationInput').value = '';
+            document.getElementById('verifyError').style.display = 'none';
+            
+            fetch(MAIL_WORKER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: pendingUser.email,
+                    code: currentVerificationCode,
+                    username: pendingUser.username
+                })
+            });
+        }
+        
+        function showError(div, message) {
+            div.textContent = message;
+            div.style.display = 'block';
+            setTimeout(() => { div.style.display = 'none'; }, 5000);
+        }
+    </script>
+</body>
+</html>

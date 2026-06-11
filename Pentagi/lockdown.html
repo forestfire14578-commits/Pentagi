@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Under Review - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <div class="auth-page">
+        <div class="auth-card" style="max-width: 520px; text-align: center;">
+            <div style="font-size: 64px; color: #F59E0B; margin-bottom: 16px;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            
+            <h2 style="color: #F59E0B;">Account Under Review</h2>
+            <p class="auth-subtitle" style="margin-bottom: 24px;">
+                Your account is currently being reviewed by Pentagi staff.
+            </p>
+            
+            <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; text-align: left;">
+                <h4 style="margin-bottom: 12px; color: #F59E0B;"><i class="fas fa-info-circle"></i> Review Information</h4>
+                
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: var(--text-primary); font-size: 13px;">Reason:</strong>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;" id="reviewReason">Loading...</p>
+                </div>
+                
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: var(--text-primary); font-size: 13px;">What this means:</strong>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                        While under review, you cannot browse servers, vote, or manage your listings. 
+                        Your servers are hidden from public view.
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: var(--text-primary); font-size: 13px;">How to appeal:</strong>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                        Join our Discord server and open a support ticket. Explain your situation 
+                        and a staff member will review your case.
+                    </p>
+                </div>
+                
+                <div>
+                    <strong style="color: var(--text-primary); font-size: 13px;">Review time:</strong>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                        Reviews typically take 24-72 hours. Repeated violations may result in a permanent ban.
+                    </p>
+                </div>
+            </div>
+            
+            <a href="#" class="btn-discord-large" id="lockdownDiscord" target="_blank" style="margin-bottom: 12px;">
+                <i class="fab fa-discord"></i> Join Discord to Appeal
+            </a>
+            
+            <button class="btn-secondary btn-full" onclick="logoutLockdown()">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        const user = getLoggedInUser();
+        
+        // If not under review, kick them out
+        if (!user || user.status !== 'under_review') {
+            localStorage.removeItem('pentagiLockdown');
+            window.location.href = 'index.html';
+        }
+        
+        // Show review reason
+        document.getElementById('reviewReason').textContent = user.reviewReason || 'No specific reason provided.';
+        
+        // Load Discord link
+        const discordLink = localStorage.getItem('pentagiContactDiscord') || 'https://discord.gg/atmGrBZKGM';
+        document.getElementById('lockdownDiscord').href = discordLink;
+        
+        function logoutLockdown() {
+            localStorage.removeItem('pentagiLoggedIn');
+            localStorage.removeItem('pentagiLockdown');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

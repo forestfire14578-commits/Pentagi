@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70' x='50%25' text-anchor='middle'>🐉</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Details - Pentagi</title>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"><i class="fas fa-cube"></i></span>
+                <span class="logo-text">PENTAGI</span>
+            </a>
+            <div class="nav-links">
+                <a href="browse.html">Browse Servers</a>
+                <a href="contact.html">Contact</a>
+                <span id="navAuth"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="server-detail" id="serverDetail"></div>
+
+    <footer class="footer">
+        <div class="footer-logo">
+            <span class="logo-icon"><i class="fas fa-cube"></i></span>
+            <span class="logo-text">PENTAGI</span>
+        </div>
+        <p>&copy; 2026 Pentagi. All rights reserved. <a href="tos.html" style="color: var(--text-muted);">Terms of Service</a></p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    
+    <script>
+        renderNavAuth();
+        
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const serverId = urlParams.get('id');
+            const servers = await getServers();
+            const server = servers.find(s => s.id === serverId);
+            const votes = await getVotes();
+            const voteCount = votes[serverId] ? Object.keys(votes[serverId]).length : 0;
+            
+            if (!server) {
+                document.getElementById('serverDetail').innerHTML = `
+                    <div style="text-align:center;padding:100px 24px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>
+                        <h2>Server Not Found</h2>
+                        <p style="color:var(--text-muted);margin:8px 0 20px;">This server doesn't exist or has been removed.</p>
+                        <a href="browse.html" class="btn-primary">Browse Servers</a>
+                    </div>`;
+                return;
+            }
+            
+            const statusClass = server.status === 'Online' ? 'green' : server.status === 'Starting' ? 'yellow' : server.status === 'Banned' ? 'red' : server.status === 'Under Review' ? 'orange' : 'red';
+            const isRestricted = server.status === 'Banned' || server.status === 'Under Review';
+            const ownerServerCount = servers.filter(s => s.owner === server.owner).length;
+            
+            // Get owner's profile picture
+            const allUsers = await getUsers();
+            const ownerAccount = allUsers.find(u => u.username === server.owner);
+            const ownerPFP = ownerAccount?.pfp || '';
+            
+            document.getElementById('serverDetail').innerHTML = `
+                ${!isRestricted && server.banner ? `
+                <div class="server-detail-banner">
+                    <img src="${server.banner}" alt="${server.name}">
+                </div>` : ''}
+                <div class="server-detail-header">
+                    <div class="server-detail-logo">${server.logo ? `<img src="${server.logo}" alt="${server.name}">` : '<i class="fas fa-cube"></i>'}</div>
+                    <div class="server-detail-info">
+                        <h1>${server.name}</h1>
+                        <div class="server-detail-category">${server.category}</div>
+                        ${!isRestricted ? `<div class="server-detail-ip">${server.ip} <button onclick="copyIP('${server.ip}')"><i class="fas fa-copy"></i></button></div>` : `<div class="server-detail-ip" style="color:var(--text-muted);">${server.status === 'Banned' ? 'Server Banned' : 'Under Review'}</div>`}
+                    </div>
+                </div>
+                <div class="server-detail-body">
+                    <div class="server-detail-description">
+                        <h3>${isRestricted ? 'Server ' + server.status : 'About This Server'}</h3>
+                        <p>${isRestricted ? 'This server is currently ' + server.status.toLowerCase() + '. Information has been hidden by Pentagi staff.' : (server.description || 'Loading server info...')}</p>
+                        ${!isRestricted && server.tags ? `<div class="server-card-tags" style="margin-top:12px;">${server.tags.split(',').map(tag => `<span class="tag-badge">${tag.trim()}</span>`).join('')}</div>` : ''}
+                    </div>
+                    <div class="server-detail-sidebar">
+                        <div class="sidebar-card">
+                            <h4>Server Info</h4>
+                            ${!isRestricted ? `
+                                <div class="sidebar-stat"><span class="sidebar-stat-label">Status</span><span class="sidebar-stat-value ${statusClass}-text">${server.status}</span></div>
+                                <div class="sidebar-stat"><span class="sidebar-stat-label">Players</span><span class="sidebar-stat-value" id="livePlayers">Loading...</span></div>
+                                <div class="sidebar-stat"><span class="sidebar-stat-label">Version</span><span class="sidebar-stat-value" id="liveVersion">--</span></div>
+                                <div class="sidebar-stat"><span class="sidebar-stat-label">Votes</span><span class="sidebar-stat-value">${voteCount}</span></div>
+                            ` : `
+                                <div class="sidebar-stat"><span class="sidebar-stat-label">Status</span><span class="sidebar-stat-value ${statusClass}-text">${server.status}</span></div>
+                                <p style="color:var(--text-muted);font-size:12px;margin-top:8px;">Server information is hidden while ${server.status.toLowerCase()}.</p>
+                            `}
+                        </div>
+                        
+                        ${!isRestricted ? `
+                        <div class="sidebar-card">
+                            <h4>Server Owner</h4>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gradient-1),var(--gradient-2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:white;overflow:hidden;">${ownerPFP ? `<img src="${ownerPFP}" style="width:100%;height:100%;object-fit:cover;">` : (server.owner ? server.owner.charAt(0).toUpperCase() : '?')}</div>
+                                <div>
+                                    <strong style="font-size:14px;">${server.owner || 'Unknown'}</strong>
+                                    ${server.owner_discord ? `<div style="font-size:12px;color:var(--text-muted);"><i class="fab fa-discord"></i> ${server.owner_discord}</div>` : ''}
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">
+                                <i class="fas fa-server"></i> ${ownerServerCount} server(s) listed
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-vote-large" onclick="goToVote('${server.id}')"><i class="fas fa-thumbs-up"></i> Vote for this Server</button>
+                        ${server.discord ? `<a href="${server.discord}" target="_blank" class="btn-discord"><i class="fab fa-discord"></i> Join Discord</a>` : ''}
+                        ` : ''}
+                    </div>
+                </div>`;
+            
+            if (!isRestricted) {
+                queryServer(server.ip).then(data => {
+                    const playersEl = document.getElementById('livePlayers');
+                    const versionEl = document.getElementById('liveVersion');
+                    
+                    if (data.online) {
+                        if (playersEl) playersEl.textContent = `${data.players}/${data.maxPlayers}`;
+                        if (versionEl) versionEl.textContent = data.version || 'Unknown';
+                        if (data.motd && !server.description) {
+                            const descEl = document.querySelector('.server-detail-description p');
+                            if (descEl) descEl.textContent = data.motd;
+                        }
+                    } else {
+                        if (playersEl) playersEl.textContent = 'Offline';
+                        if (versionEl) versionEl.textContent = '--';
+                    }
+                });
+            }
+        }
+        
+        function goToVote(serverId) { window.location.href = 'vote.html?id=' + serverId; }
+        
+        init();
+    </script>
+</body>
+</html>
